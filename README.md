@@ -40,7 +40,7 @@ Note: The above command will install go if it's not already installed.
 Launch **cronnow** to interactively select and execute cron jobs:
 
 ```sh
-./cronnow
+cronnow
 ```
 
 ### Options
@@ -57,7 +57,7 @@ Launch **cronnow** to interactively select and execute cron jobs:
 For example, to run a job from a specific file without confirmation:
 
 ```sh
-./cronnow -f path/to/crontab -y
+cronnow -f path/to/crontab -y
 ```
 
 ## How It Works
