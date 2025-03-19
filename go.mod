@@ -1,4 +1,4 @@
-module crontab_exec
+module cron-now
 
 go 1.21.1
 
