@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/ktr0731/go-fuzzyfinder"
+    "github.com/koki-develop/go-fzf"
 )
 
 func usage() {
@@ -89,13 +89,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	idx, err := fuzzyfinder.Find(jobLines, func(i int) string {
+    f, _ := fzf.New()
+
+	idxs, err := f.Find(jobLines, func(i int) string {
 		return jobLines[i]
 	})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to select a job: %v\n", err)
 		os.Exit(1)
 	}
+
+    idx := idxs[0]
 
 	selected := jobLines[idx]
 
