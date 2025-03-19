@@ -15,11 +15,13 @@ import (
 func usage() {
 	fmt.Println("Usage: cronnow [-f file] [-h]")
 	fmt.Println("  -f file   Specify a crontab file. If not specified, the output of 'crontab -l' is used.")
+	fmt.Println("  -y        Execute the selected cron job without confirmation.")
 	fmt.Println("  -h        Display this help message.")
 }
 
 func main() {
 	filePtr := flag.String("f", "", "Specify a crontab file. If not specified, the output of 'crontab -l' is used.")
+    autoConfirmPtr := flag.Bool("y", false, "Execute the selected cron job without confirmation.")
 	helpPtr := flag.Bool("h", false, "Display this help message.")
 	flag.Parse()
 
@@ -49,9 +51,7 @@ func main() {
 		cronContent = string(out)
 	}
 
-	// Split content into lines
 	lines := strings.Split(cronContent, "\n")
-	// Regular expression to match environment variable definitions
 	envRegex := regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*=`)
 
 	var envLines []string
@@ -75,7 +75,6 @@ func main() {
 		}
 	}
 
-	// Set environment variables from the crontab definitions
 	for _, envLine := range envLines {
 		parts := strings.SplitN(envLine, "=", 2)
 		if len(parts) == 2 {
@@ -90,7 +89,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Use go-fuzzyfinder to interactively select a job line
 	idx, err := fuzzyfinder.Find(jobLines, func(i int) string {
 		return jobLines[i]
 	})
@@ -101,29 +99,28 @@ func main() {
 
 	selected := jobLines[idx]
 
-	// Split the selected line by spaces and remove the first 5 fields (schedule)
 	fields := strings.Fields(selected)
 	if len(fields) < 6 {
 		fmt.Println("The selected line is not in a valid cron job format (insufficient fields).")
 		os.Exit(1)
 	}
 	cmdLine := strings.Join(fields[5:], " ")
-	// Expand environment variables in the command
 	expandedCmd := os.ExpandEnv(cmdLine)
 
 	fmt.Printf("Command to be executed: %s\n", expandedCmd)
-	fmt.Print("Are you sure you want to execute? (y/n): ")
 
-	scanner := bufio.NewScanner(os.Stdin)
-	scanner.Scan()
-	answer := strings.TrimSpace(scanner.Text())
-	if answer != "y" && answer != "Y" {
-		fmt.Println("Operation cancelled.")
-		os.Exit(0)
+	if !*autoConfirmPtr {
+		fmt.Print("Are you sure you want to execute? (y/n): ")
+		scanner := bufio.NewScanner(os.Stdin)
+		scanner.Scan()
+		answer := strings.TrimSpace(scanner.Text())
+		if answer != "y" && answer != "Y" {
+			fmt.Println("Operation cancelled.")
+			os.Exit(0)
+		}
 	}
 
-	// Execute the command using bash
-	execCmd := exec.Command("bash", "-c", expandedCmd)
+	execCmd := exec.Command("sh", "-c", expandedCmd)
 	execCmd.Stdout = os.Stdout
 	execCmd.Stderr = os.Stderr
 	execCmd.Stdin = os.Stdin
