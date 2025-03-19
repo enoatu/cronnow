@@ -1,4 +1,4 @@
-module cron-now
+module github.com/enoatu/cron-now
 
 go 1.21.1
 
