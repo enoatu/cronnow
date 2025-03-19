@@ -8,7 +8,9 @@
 - **Flexible Cron Input:** Automatically reads your current crontab or a user-specified file.
 - **Environment Variable Handling:** Automatically sets and expands environment variables defined in your crontab.
 - **Safe Execution:** Review the command before execution or skip confirmation with the `-y` flag for non-interactive usage.
-- **Customizable Shell Execution:** By default, executes commands using bash; you can easily adapt it to your shell of choice.
+
+![画面収録 2025-03-19 23](https://github.com/user-attachments/assets/9dfc02ce-8927-4b20-9b4f-bdeb3b1e72eb)
+
 
 ## Installation
 
