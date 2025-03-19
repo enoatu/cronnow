@@ -13,7 +13,7 @@ import (
 )
 
 func usage() {
-	fmt.Println("Usage: cronexec [-f file] [-h]")
+	fmt.Println("Usage: cronnow [-f file] [-h]")
 	fmt.Println("  -f file   Specify a crontab file. If not specified, the output of 'crontab -l' is used.")
 	fmt.Println("  -h        Display this help message.")
 }
