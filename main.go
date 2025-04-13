@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+    "runtime"
 	"regexp"
 	"strings"
 
@@ -17,18 +18,78 @@ func usage() {
 	fmt.Println("  -f file   Specify a crontab file. If not specified, the output of 'crontab -l' is used.")
 	fmt.Println("  -y        Execute the selected cron job without confirmation.")
 	fmt.Println("  -h        Display this help message.")
+    fmt.Println("  -d        Debug mode.")
+}
+
+type CronEnv struct {
+	Shell string
+	Path  string
+}
+
+func detectOS() string {
+	goos := runtime.GOOS
+
+	if goos == "darwin" {
+		return "macos"
+	}
+	if goos != "linux" {
+		return goos // fallback: windows, etc.
+	}
+
+	file, err := os.Open("/etc/os-release")
+	if err != nil {
+		return "linux"
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "ID=") {
+			return strings.Trim(strings.SplitN(line, "=", 2)[1], `"`)
+		}
+	}
+	return "linux"
+}
+
+func getCronEnv(id string) CronEnv {
+	switch id {
+	case "ubuntu", "debian", "raspbian":
+		return CronEnv{Shell: "/bin/sh", Path: "/usr/bin:/bin"}
+	case "centos", "rhel", "almalinux", "rocky":
+		return CronEnv{Shell: "/bin/bash", Path: "/sbin:/bin:/usr/sbin:/usr/bin"}
+    case "macos":
+        return CronEnv{Shell: "/bin/sh", Path: "/usr/bin:/bin:/usr/sbin:/sbin"}
+	case "alpine":
+		return CronEnv{Shell: "/bin/sh", Path: "/usr/bin:/bin"}
+	case "arch":
+		return CronEnv{Shell: "/bin/sh", Path: "/usr/bin:/bin"}
+	default:
+		return CronEnv{Shell: "/bin/sh", Path: "/usr/bin:/bin"}
+	}
 }
 
 func main() {
 	filePtr := flag.String("f", "", "Specify a crontab file. If not specified, the output of 'crontab -l' is used.")
     autoConfirmPtr := flag.Bool("y", false, "Execute the selected cron job without confirmation.")
 	helpPtr := flag.Bool("h", false, "Display this help message.")
+    debugPtr := flag.Bool("d", false, "Debug mode.")
 	flag.Parse()
 
 	if *helpPtr {
 		usage()
 		return
 	}
+
+    // OSごとのcron環境変数を設定
+	id := detectOS()
+    if *debugPtr {
+        fmt.Fprintf(os.Stderr, "Detected OS: %s\n", id)
+    }
+	cronEnv := getCronEnv(id)
+
+	os.Setenv("SHELL", cronEnv.Shell)
+	os.Setenv("PATH", cronEnv.Path)
 
 	var cronContent string
 	if *filePtr != "" {
@@ -111,7 +172,7 @@ func main() {
 	cmdLine := strings.Join(fields[5:], " ")
 	expandedCmd := os.ExpandEnv(cmdLine)
 
-	fmt.Printf("Command to be executed: %s\n", expandedCmd)
+	fmt.Printf("Command to be executed: %s\n\n", expandedCmd)
 
 	if !*autoConfirmPtr {
 		fmt.Print("Are you sure you want to execute? (y/n): ")
@@ -124,10 +185,10 @@ func main() {
 		}
 	}
 
-	execCmd := exec.Command("sh", "-c", expandedCmd)
-	execCmd.Stdout = os.Stdout
-	execCmd.Stderr = os.Stderr
-	execCmd.Stdin = os.Stdin
+	execCmd := exec.Command("env", "-i", expandedCmd)
+    execCmd.Stdout = os.Stdout
+    execCmd.Stderr = os.Stderr
+    execCmd.Stdin = os.Stdin
 	if err := execCmd.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to execute the command: %v\n", err)
 		os.Exit(1)
