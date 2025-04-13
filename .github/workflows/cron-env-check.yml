@@ -14,7 +14,7 @@ jobs:
           - ubuntu:22.04
           - debian:bullseye
           - alpine:3.18
-          - centos:7
+          - rockylinux:9
     name: ${{ matrix.image }}
     
     steps:
@@ -51,14 +51,11 @@ jobs:
           fi
 
           # 次の0秒がくるまで待機
-          sleep 61
           CURRENT_SEC=$(date +%S)
           DIFF=$((60 - 10#$CURRENT_SEC))
           TOTAL_WAIT=$(( (DIFF == 0 ? 60 : DIFF) + 5 ))
           echo "Current seconds: $CURRENT_SEC. Waiting $TOTAL_WAIT seconds until the next cron trigger..."
           sleep $TOTAL_WAIT
-
-          cat /host/hoge.txt
           EOF
 
           chmod +x setup-cron.sh
