@@ -56,10 +56,10 @@ jobs:
           chmod +x setup-cron.sh
 
           # Dockerコンテナを起動：ホスト側のカレントディレクトリを /host にマウント
-          docker run --rm -v /tmp:/host --name $CONTAINER $IMAGE ./setup-cron.sh || true
+          docker run --rm -v "$PWD":/host --name $CONTAINER $IMAGE /host/setup-cron.sh || true
 
       - name: Show env from cron
         run: |
           echo "::group::Dump cron env output from ${{ matrix.image }}"
-          cat /tmp/hoge.txt || echo "env not found"
+          cat ./hoge.txt || echo "env not found"
           echo "::endgroup::"
