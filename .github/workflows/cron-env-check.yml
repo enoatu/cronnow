@@ -58,6 +58,8 @@ jobs:
           TOTAL_WAIT=$(( (DIFF == 0 ? 60 : DIFF) + 5 ))
           echo "Current seconds: $CURRENT_SEC. Waiting $TOTAL_WAIT seconds until the next cron trigger..."
           sleep $TOTAL_WAIT
+
+          cat /host/hoge.txt
           EOF
 
           chmod +x setup-cron.sh
