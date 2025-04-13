@@ -51,6 +51,8 @@ jobs:
           fi
 
           sleep 61
+          EOF
+
           chmod +x setup-cron.sh
 
           # Dockerコンテナを起動：ホスト側のカレントディレクトリを /host にマウント
