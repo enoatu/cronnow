@@ -43,11 +43,16 @@ jobs:
           # ユーザーのcrontabにcronジョブを登録
           echo "* * * * * env > /host/hoge.txt" | crontab -
 
-          # cronデーモンをバックグラウンドで起動
-          if command -v crond >/dev/null 2>&1; then
-            crond -l 2 -f &
+          if [ -f /etc/redhat-release ]; then
+            # RHEL 系 (RockyLinux等)
+            crond -n &
           else
-            service cron start
+            # Ubuntu や Debian などの場合
+            if command -v crond >/dev/null 2>&1; then
+              crond -l 2 -f &
+            else
+              service cron start
+            fi
           fi
 
           sleep 61

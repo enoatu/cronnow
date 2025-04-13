@@ -54,14 +54,16 @@ func detectOS() string {
 
 func getCronEnv(id string) CronEnv {
 	switch id {
-	case "ubuntu", "debian", "raspbian":
+    case "ubuntu":
+		return CronEnv{Shell: "/bin/sh", Path: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"}
+    case "debian":
 		return CronEnv{Shell: "/bin/sh", Path: "/usr/bin:/bin"}
-	case "centos", "rhel", "almalinux", "rocky":
+	case "alpine":
+		return CronEnv{Shell: "/bin/sh", Path: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"}
+	case "rocky":
 		return CronEnv{Shell: "/bin/bash", Path: "/sbin:/bin:/usr/sbin:/usr/bin"}
     case "macos":
         return CronEnv{Shell: "/bin/sh", Path: "/usr/bin:/bin:/usr/sbin:/sbin"}
-	case "alpine":
-		return CronEnv{Shell: "/bin/sh", Path: "/usr/bin:/bin"}
 	case "arch":
 		return CronEnv{Shell: "/bin/sh", Path: "/usr/bin:/bin"}
 	default:
