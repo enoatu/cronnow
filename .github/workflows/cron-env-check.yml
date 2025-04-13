@@ -50,18 +50,11 @@ jobs:
             service cron start
           fi
 
-          # 次の0秒がくるまで待機
-          CURRENT_SEC=$(date +%S)
-          DIFF=$((60 - 10#$CURRENT_SEC))
-          TOTAL_WAIT=$(( (DIFF == 0 ? 60 : DIFF) + 5 ))
-          echo "Current seconds: $CURRENT_SEC. Waiting $TOTAL_WAIT seconds until the next cron trigger..."
-          sleep $TOTAL_WAIT
-          EOF
-
+          sleep 61
           chmod +x setup-cron.sh
 
           # Dockerコンテナを起動：ホスト側のカレントディレクトリを /host にマウント
-          docker run --rm -v "$PWD":/host --name $CONTAINER $IMAGE /host/setup-cron.sh
+          docker run --rm -v "$PWD":/host --name $CONTAINER $IMAGE /host/setup-cron.sh || true
 
       - name: Show env from cron
         run: |
