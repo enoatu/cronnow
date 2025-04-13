@@ -56,7 +56,7 @@ jobs:
           chmod +x setup-cron.sh
 
           # Dockerコンテナを起動：ホスト側のカレントディレクトリを /host にマウント
-          docker run --rm -v /tmp:/host --name $CONTAINER $IMAGE /host/setup-cron.sh || true
+          docker run --rm -v /tmp:/host --name $CONTAINER $IMAGE ./setup-cron.sh || true
 
       - name: Show env from cron
         run: |
