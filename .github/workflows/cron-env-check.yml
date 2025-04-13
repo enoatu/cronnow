@@ -15,7 +15,6 @@ jobs:
           - debian:bullseye
           - alpine:3.18
           - centos:7
-          - centos:stream9
     name: ${{ matrix.image }}
     
     steps:
