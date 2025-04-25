@@ -187,7 +187,7 @@ func main() {
 		}
 	}
 
-	execCmd := exec.Command(expandedCmd)
+	execCmd := exec.Command("sh", "-c", expandedCmd)
   execCmd.Stdout = os.Stdout
   execCmd.Stderr = os.Stderr
   execCmd.Stdin = os.Stdin
